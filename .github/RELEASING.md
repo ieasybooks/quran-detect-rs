@@ -6,7 +6,7 @@ The repository follows the sibling projects: Conventional Commits, release-pleas
 
 Before using release-please, enable the repository setting that allows GitHub Actions to create pull requests.
 
-`release.yml` builds `quran-detect` for Linux (x86_64 and arm64), macOS (arm64 and x86_64) and Windows (x86_64), smoke-tests each native binary, and packages it with the README, license, Tanzil notices, generated dependency licenses, CLI reference and man page. Manual runs without `publish` keep CI artifacts only. Publishing requires a tag matching the root package version.
+`release.yml` builds `quran-detect` natively for Linux (x86_64 and arm64), macOS (arm64 and x86_64) and Windows (x86_64, with a static C runtime), packages it with the README, license, Tanzil notices, generated dependency licenses, CLI reference and man page (`.zip` on Windows, `.tar.gz` elsewhere, each with a SHA-256 file), and smoke-tests the binary extracted from each archive. Manual runs without `publish` keep CI artifacts only. Publishing requires a tag matching the root package version.
 
 `publish.yml` verifies the workspace packages, then publishes `quran-detect` before `quran-detect-cli`, skipping versions already on crates.io. First-time publication requires a repository `CARGO_REGISTRY_TOKEN`. After initial publication, configure trusted publishing for both crates with this repository, workflow `publish.yml` and environment `release`, then remove the token. Creating this repository or a pull request does not publish anything.
 
