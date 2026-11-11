@@ -1,0 +1,7 @@
+# Embedded Tanzil files and Unicode fixtures must stay byte-identical to their pinned
+# SHA-256 hashes on every platform, so Git never converts their line endings.
+crates/quran-detect/data/** -text
+crates/quran-detect/tests/fixtures/** -text
+crates/quran-detect/src/tables.rs linguist-generated
+docs/cli.md linguist-generated
+docs/quran-detect.1 linguist-generated

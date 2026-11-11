@@ -1,0 +1,21 @@
+Third-party Rust dependency licenses
+
+quran-detect's own code is MIT licensed. Dependency licenses remain unchanged.
+The embedded Tanzil Quran text keeps its own terms; see THIRD-PARTY-NOTICES.md.
+
+{{#each licenses}}
+===============================================================================
+{{name}} ({{id}})
+
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}}
+  Source: https://crates.io/api/v1/crates/{{crate.name}}/{{crate.version}}/download
+{{#if crate.repository}}
+  Repository: {{{crate.repository}}}
+{{/if}}
+{{/each}}
+
+{{{text}}}
+
+{{/each}}

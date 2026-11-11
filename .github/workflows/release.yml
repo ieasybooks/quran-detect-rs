@@ -1,0 +1,117 @@
+name: Release binaries
+
+# Builds `quran-detect` for each platform and attaches the archives to the GitHub release.
+# Manual runs keep artifacts only, unless publishing is explicitly enabled on a release tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Attach archives to this tag's GitHub release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Ubuntu 22.04 keeps the glibc requirement low (2.35).
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+            executable: quran-detect
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04-arm
+            executable: quran-detect
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            executable: quran-detect
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            executable: quran-detect
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            executable: quran-detect.exe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      # Installs the toolchain pinned in rust-toolchain.toml, then the target to build for.
+      - run: rustup toolchain install && rustup target add ${{ matrix.target }}
+      - name: Check the release tag matches the crate version
+        if: github.event_name == 'release' || inputs.publish
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name == "quran-detect-cli") | .version')
+          if [ "$GITHUB_REF_TYPE" != tag ] || [ "$TAG" != "v$version" ]; then
+            echo "::error::Publishing requires the tag v$version"
+            exit 1
+          fi
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - uses: jdx/mise-action@v5.2.3
+        with:
+          install_args: cargo:cargo-about
+      - run: cargo build --release --locked --package quran-detect-cli --target ${{ matrix.target }}
+      - name: Smoke-test the binary
+        if: matrix.target != 'x86_64-apple-darwin'
+        env:
+          BINARY: target/${{ matrix.target }}/release/${{ matrix.executable }}
+        run: |
+          output=$("$BINARY" --text 'فيختم بقل هو الله أحد')
+          test "$output" = 'فيختم بقُلْ هُوَ اللَّهُ أَحَدٌ'
+      - name: Package
+        env:
+          VERSION: ${{ (github.event_name == 'release' || inputs.publish) && github.ref_name || 'dev' }}
+          TARGET: ${{ matrix.target }}
+          EXECUTABLE: ${{ matrix.executable }}
+        run: |
+          name="quran-detect-$VERSION-$TARGET"
+          mkdir -p "$name/docs"
+          cp "target/$TARGET/release/$EXECUTABLE" README.md LICENSE crates/quran-detect/THIRD-PARTY-NOTICES.md "$name/"
+          cp docs/cli.md docs/quran-detect.1 "$name/docs/"
+          cargo about generate --locked --all-features --workspace --fail about.hbs --output-file "$name/THIRD-PARTY-LICENSES.txt"
+          tar -czf "$name.tar.gz" "$name"
+          if command -v sha256sum >/dev/null; then
+            sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
+          else
+            shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+          fi
+          wc -c "$name.tar.gz"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: quran-detect-*.tar.gz*
+          if-no-files-found: error
+
+  upload:
+    name: Attach to the release
+    needs: build
+    if: github.event_name == 'release' || inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"

@@ -1,0 +1,2 @@
+# "CPython" names the reference interpreter in docs; ".." keeps the default list.
+doc-valid-idents = ["CPython", ".."]

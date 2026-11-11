@@ -1,0 +1,25 @@
+[package]
+name = "quran-detect"
+version = "0.1.0"
+description = "Detect Quran quotations in Arabic text and restore their canonical Tanzil wording."
+readme = "README.md"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories = ["text-processing"]
+include = ["src/**", "data/**", "tests/**", "Cargo.toml", "README.md", "LICENSE", "THIRD-PARTY-NOTICES.md"]
+
+[dependencies]
+quick-xml.workspace = true
+serde.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+unicode-normalization.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true
