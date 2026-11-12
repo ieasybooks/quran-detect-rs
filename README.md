@@ -6,6 +6,12 @@ The `quran-detect` library and command match text against an embedded, unmodifie
 
 ## Install
 
+Install with [mise](https://mise.jdx.dev/):
+
+```sh
+mise use -g github:ieasybooks/quran-detect-rs@latest
+```
+
 Download the archive for your platform from the [latest release](https://github.com/ieasybooks/quran-detect-rs/releases/latest), extract it, and put `quran-detect` on your `PATH`. Archives support Linux x86_64/arm64, macOS arm64/x86_64 and Windows x86_64.
 
 Or install with Cargo (Rust 1.99 or newer):
