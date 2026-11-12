@@ -75,6 +75,7 @@ A `Detector` is cheap to clone and safe to share between threads; the corpus ind
 - [JSON formats](docs/formats.md): the match and plan formats.
 - [Canonical text](docs/corpus.md): why Tanzil, its scripts and editions.
 - [Validation](docs/validation.md): parity with the Python reference on 17,322 cases, benchmark results and speed.
+- [Comparison](docs/comparison.md): against two IslamicEval 2026 shared-task models on OCR pages, lecture transcripts and the shared task's development set.
 - [CLI reference](docs/cli.md): every option, example and exit code. Also available through `quran-detect --help`.
 - [Man page](docs/quran-detect.1): included in release archives.
 - API documentation: [`quran-detect`](https://docs.rs/quran-detect).
