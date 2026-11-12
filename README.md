@@ -1,20 +1,22 @@
-# quran-detect-rs
+# quran-detect
 
 Detect Quran quotations in Arabic text and restore their canonical wording, as a Rust library and command-line tool. Works on prose, OCR output and speech transcripts, including damaged quotations with typos and missing, extra, merged or split words.
 
 The `quran-detect` library and command match text against an embedded, unmodified copy of the [Tanzil](https://tanzil.net) Quran text (Hafs, Kufan verse count). Each accepted quotation is rewritten with the canonical, vocalized wording; text outside the quotations is preserved byte for byte, including markup, punctuation and line endings. Every change can be recorded in a plan and undone exactly.
 
-## Build
+## Install
 
-Use the pinned Rust toolchain (1.99.1):
+Download the archive for your platform from the [latest release](https://github.com/ieasybooks/quran-detect-rs/releases/latest), extract it, and put `quran-detect` on your `PATH`. Archives support Linux x86_64/arm64, macOS arm64/x86_64 and Windows x86_64.
+
+Or install with Cargo (Rust 1.99 or newer):
 
 ```sh
-cargo build --release --locked
+cargo install quran-detect-cli --locked
 ```
 
-The executable is `target/release/quran-detect`. It needs no network access, model files or runtime libraries; the Tanzil text is compiled in.
+`quran-detect` needs no network access, model files or runtime libraries; the Tanzil text is compiled in.
 
-## Use
+## Usage
 
 ```sh
 quran-detect --text 'فيختم بقل هو الله أحد'
@@ -30,7 +32,6 @@ quran-detect book.txt --matches chosen.json         # apply an edited selection
 quran-detect plan book.txt -o plan.json             # record every edit
 quran-detect apply book.txt --plan plan.json -o restored.txt
 quran-detect revert restored.txt --plan plan.json -o original.txt
-quran-detect completions zsh --install
 ```
 
 `--preset strict|balanced|tolerant` sets how damaged a quotation may be; balanced is the default. Strict accepts only exact normalized wording; balanced and tolerant repair more but can occasionally alter ordinary prose. Individual limits, the allowed errors, the exact-context guard and the rendered script (`simple-plain` or `simple`) can be set separately. Existing output files require `--force`. JSON offsets are UTF-8 bytes. See [matching and configuration](docs/matching.md), [JSON formats](docs/formats.md), the [CLI reference](docs/cli.md) and the [canonical text](docs/corpus.md).
@@ -38,6 +39,12 @@ quran-detect completions zsh --install
 Matching recognizes canonical wording; it does not establish that a writer meant to quote. Only the Hafs reading is embedded, so balanced mode also "corrects" valid readings from other riwayat to Hafs.
 
 ## Library
+
+Add the library to an application:
+
+```sh
+cargo add quran-detect
+```
 
 ```rust
 use quran_detect::{Brackets, Config, Detector, Formatting, Preset, Script};
@@ -54,13 +61,27 @@ assert_eq!(plan.revert(&restored)?, text);
 # Ok::<(), quran_detect::Error>(())
 ```
 
-A `Detector` is cheap to clone and safe to share between threads; the corpus index is built once per process, in about 0.2 seconds. See the [library README](crates/quran-detect/README.md).
+A `Detector` is cheap to clone and safe to share between threads; the corpus index is built once per process, in about 0.2 seconds. See the [library README](crates/quran-detect/README.md) and the [API documentation](https://docs.rs/quran-detect).
 
-## Accuracy
+## Documentation
 
-The matching algorithm is a port of the Python reference implementation (`quran-matcher` 0.2). On 17,322 cases (every benchmark text and edge case, the three presets in both scripts, plus six variant configurations), its matches, alternatives, edits, plans and outputs are identical to the reference running on the same Tanzil text. Against the reference's own benchmark results on its older corpus, 112 of 138 rates are identical and the rest are at most 0.27 points lower, all because of two verses Tanzil corrected in version 1.1 (17:32 and 8:6). See [validation](docs/validation.md).
+- [Matching and configuration](docs/matching.md): how a match is found, presets, options, exact context, alternatives and formatting.
+- [JSON formats](docs/formats.md): the match and plan formats.
+- [Canonical text](docs/corpus.md): why Tanzil, its scripts and editions.
+- [Validation](docs/validation.md): parity with the Python reference on 17,322 cases, benchmark results and speed.
+- [CLI reference](docs/cli.md): every option, example and exit code. Also available through `quran-detect --help`.
+- [Man page](docs/quran-detect.1): included in release archives.
+- API documentation: [`quran-detect`](https://docs.rs/quran-detect).
+
+Install shell completions, then follow any printed setup instructions (replace `zsh` with your shell):
+
+```sh
+quran-detect completions zsh --install
+```
 
 ## Development
+
+Install the configured tools with mise, then run the checks from the repository root:
 
 ```sh
 mise install
@@ -68,9 +89,10 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 cargo deny --locked check
-sh scripts/cli-docs.sh   # after changing CLI declarations
 ```
 
-[`scripts/generate-tables.py`](scripts/generate-tables.py) regenerates the frozen Unicode and HTML tables from CPython 3.13, and [`scripts/parity.py`](scripts/parity.py) compares this implementation with the Python reference; see [validation](docs/validation.md). Releases: [release workflow](.github/RELEASING.md).
+After changing CLI declarations, regenerate the CLI reference and man page with `sh scripts/cli-docs.sh`; CI checks that they are current. [`scripts/generate-tables.py`](scripts/generate-tables.py) regenerates the frozen Unicode and HTML tables from CPython 3.13, and [`scripts/parity.py`](scripts/parity.py) compares this implementation with the Python reference; see [validation](docs/validation.md). See [AGENTS.md](AGENTS.md) for project conventions and the [release workflow](.github/RELEASING.md) for releases.
 
-Code is MIT licensed. The embedded Quran text is from the Tanzil Project, <https://tanzil.net>, under CC BY 3.0 and Tanzil's verbatim-copy terms; see [third-party notices](crates/quran-detect/THIRD-PARTY-NOTICES.md).
+## License
+
+MIT. The embedded Quran text is from the Tanzil Project, <https://tanzil.net>, under CC BY 3.0 and Tanzil's verbatim-copy terms; see [third-party notices](crates/quran-detect/THIRD-PARTY-NOTICES.md).
