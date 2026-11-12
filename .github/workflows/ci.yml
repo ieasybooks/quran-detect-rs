@@ -20,7 +20,7 @@ jobs:
       # Installs the toolchain pinned in rust-toolchain.toml, with rustfmt and clippy.
       - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - uses: jdx/mise-action@v5.2.3
+      - uses: jdx/mise-action@v5.2.7
       - name: Check workspace versions and release-please dependency names
         run: |
           cargo metadata --no-deps --locked --format-version 1 \
