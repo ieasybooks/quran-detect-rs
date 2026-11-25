@@ -45,7 +45,7 @@ keywords = ["arabic", "quran", "detection", "text-processing", "tanzil"]
 
 [workspace.dependencies]
 anyhow = "1.0.104"
-quick-xml = "0.41.0"
+quick-xml = "0.42.0"
 serde = { version = "1.0.229", features = ["derive"] }
 # Correctly rounded float parsing, so matches read back from JSON keep their exact values.
 serde_json = { version = "1.0.154", features = ["float_roundtrip"] }
